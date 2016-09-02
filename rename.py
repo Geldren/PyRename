@@ -3,9 +3,10 @@ import glob
 import re
 import sys
 
-#modules containing the functions to actual work on files
-import renaming_options as ro
-import other_options as oo
+#module containing the functions to actual work on files
+import optionFuncs as of
+import input
+import files
 
 #List of groups of cmd options that mean the same thing
 ARGALIAS = [['-t', '--trim'],
@@ -27,19 +28,20 @@ OPTIONARGS = {'-t': 1,'-r': 2,'-n': 1,'-D': 1,'-T': 1,
               '-l': 0,'-u': 0,'-h': 0,'-v': 0,'-p': 0,
               '-i': 0,'-d': 0,'-dt':0}
 
-OPTIONFUNCTIONS = {'-t': ro.option_trim, '-r': ro.option_replace, '-n': ro.option_number, '-D': oo.option_date,
-                   '-T': oo.option_time, '-l': ro.option_lower, '-u': ro.option_upper,
-                   '-d': oo.option_date, '-dt': oo.option_touch}
+#Dictonary of functions for arguments
+OPTIONFUNCTIONS = {'-t': of.option_trim, '-r': of.option_rename, '-n': of.option_number,'-l': of.option_lower, '-u': of.option_upper,
+                   '-D': of.option_date, '-T': of.option_time, '-dt': of.option_touch}
 
-OPTIONORDER = ['d', '-l', '-u', '-t', '-r', '-n', '-t', '-D', '-T']
+RENAMEORDER = ['d', '-l', '-u', '-t', '-r', '-n']
+OTHERORDER = ['-t', '-D', '-T']
 
 def main(argv):
     '''Main execution function for renaming program'''
-    options = []
+    options = {}
     fileGlobs = []
     files = []
 
-    interactive = printonly = verbose = False;
+    interactive = printonly = verbose = delete = False;
 
     i=1
     while i < len(argv):
@@ -56,9 +58,11 @@ def main(argv):
         elif arg == '-h':
             usage()
             return
+        elif arg == '-d':
+            delete = true
         #if known option, get extra argument options
         elif arg in OPTIONARGS:
-            argList = [arg]
+            argList = []
 
             #read n arguments
             for j in range(OPTIONARGS[arg]):
@@ -67,7 +71,7 @@ def main(argv):
                 argList.append(argv[i])
 
             #add arg and parameters to options list
-            options.append(argList)
+            options[arg] = argList
         else:
             #otherwise, assume filename
             fileGlobs.append(arg)
@@ -80,9 +84,55 @@ def main(argv):
 
     #Assume each file name is a glob format and expand it to an actual file list
     for f in fileGlobs:
-        file += glob.glob(f)
+        files += glob.glob(f)
 
     print("Files: ", files)
+
+    #process files one at a time
+    for f in files:
+        run = True
+
+        #if interactive prompt user for each file
+        if interactive:
+            run = getBoolInput("Process file" + f + "? (y/n)")
+        if run:
+            #special case delete
+            if delete:
+                deleteFile(f)
+                continue
+
+            #apply all rename functions in order
+            newName = f
+            for o in RENAMEORDER:
+                if o in options:
+                    #Try-catch in case something is invalid about the arguments given
+                    try:
+                        newName = OPTIONFUNCTIONS[o](options[o], newName)
+                    except Exception as e:
+                        if len(e.args) < 1:
+                            print("Unexpected exception:", e)
+                        else:
+                            print("Exception: ", e.args[0])
+
+            #print before/after names if requested
+            if verbose or printonly:
+                print(f, "-->", newName)
+            #if not printonly, actually apply the name change
+            if not printonly:
+                renameFile(f, newName)
+                f = newName
+
+            #apply all non-rename functions in order
+            for o in OTHERORDER:
+                if o in options:
+                    #Try-catch in case something is invalid about the arguments given
+                    try:
+                        OPTIONFUNCTIONS[o](options[o], f)
+                    except Exception as e:
+                        if len(e.args) < 1:
+                            print("Unexpected exception:", e)
+                        else:
+                            print("Exception: ", e.args[0])
 
 def getArgAlias(arg):
     '''Checks if an argument is an alias and returns the most simple form if so; returns the argument if not'''
