@@ -39,7 +39,7 @@ def main(argv):
     '''Main execution function for renaming program'''
     options = {}
     fileGlobs = []
-    files = []
+    fileNames = []
 
     interactive = printonly = verbose = delete = False;
 
@@ -84,21 +84,21 @@ def main(argv):
 
     #Assume each file name is a glob format and expand it to an actual file list
     for f in fileGlobs:
-        files += glob.glob(f)
+        fileNames += glob.glob(f)
 
-    print("Files: ", files)
+    print("Files: ", fileNames)
 
     #process files one at a time
-    for f in files:
+    for f in fileNames:
         run = True
 
         #if interactive prompt user for each file
         if interactive:
-            run = getBoolInput("Process file" + f + "? (y/n)")
+            run = input.getBoolInput("Process file" + f + "? (y/n)")
         if run:
             #special case delete
             if delete:
-                deleteFile(f)
+                files.deleteFile(f)
                 continue
 
             #apply all rename functions in order
@@ -119,7 +119,7 @@ def main(argv):
                 print(f, "-->", newName)
             #if not printonly, actually apply the name change
             if not printonly:
-                renameFile(f, newName)
+                files.renameFile(f, newName)
                 f = newName
 
             #apply all non-rename functions in order
