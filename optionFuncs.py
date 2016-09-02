@@ -1,38 +1,45 @@
-def option_lower(parameters, files):
-    print("Make stuff lowercase")
+import renameException
+import re
 
-    return files.lower()
+def option_lower(parameters, fileName):
+    '''Make stuff lowercase'''
 
-def option_upper(parameters, files):
-    print("Make stuff uppercase")
+    return fileName.lower()
 
-    return files.upper()
+def option_upper(parameters, fileName):
+    '''Make stuff uppercase'''
 
-def option_trim(parameters, files):
-    print("Trim characters from front or back")
+    return fileName.upper()
 
-    n = 0
+def option_trim(parameters, fileName):
+    '''Trim characters from front or back'''
 
     #Try to interpret param as number; if fail, raise exception with single error message string to be handled in main
+    n = 0
     try:
         n = int(parameters[0])
     except:
-        raise Exception("Invalid trim option: " + str(n))
+        raise RenameException("Invalid trim option: " + str(n))
         return
 
     if n < 0:
-        return( files[0:(len(files)-n)])
+        return fileName[0:n]
     else:
-        return( files[(n+1):(len(files)-1)])
+        return fileName[n:len(fileName)]
 
-def option_rename(parameters, files):
-    print("Replaces the whole name")
+def option_rename(parameters, fileName):
+    '''Replaces the whole name'''
+    return fileName
 
-def option_number(parameters, files):
-    print("Numbers the files with given countstring")
-def option_touch(parameters, files):
-    print("sets date and time to now")
-def option_date(parameters, files):
-    print("Set datestamp")
-def option_time(parameters, files):
-    print("Set timestamp")
+def option_number(parameters, fileName):
+    '''Numbers the fileName with given countstring'''
+    return fileName
+
+def option_touch(parameters, fileName):
+    '''sets date and time to now'''
+
+def option_date(parameters, fileName):
+    '''Set datestamp'''
+
+def option_time(parameters, fileName):
+    '''Set timestamp'''
