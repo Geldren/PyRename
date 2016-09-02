@@ -5,12 +5,34 @@ class ArgumentException(Exception):
 class Argument:
     TYPE_DEFAULT = 'def'
 
-    def __init__(self, aliases, argtype=TYPE_DEFAULT, parameters=0, functions=[], givenParams=[]):
+    def __init__(self, aliases, argtype=TYPE_DEFAULT, parameters=0, functions=[], givenParams=[], name="", argNames=[], desc=[]):
         self._argtype = argtype
         self._parameters = parameters
         self._functions = functions
         self._aliases = aliases
         self._givenParams = givenParams
+
+        #Generate help menu entry for this argument
+        self._helpStr = ""
+        if len(name) > 0:
+            self._helpStr = name + ": "
+        for a in aliases:
+            self._helpStr = self._helpStr + ' ' + a
+        self._helpStr = self._helpStr
+
+        i = 0
+        while i < parameters:
+            self._helpStr = self._helpStr + ' ' + argNames[i] if len(argNames)>i else "arg"+str(i)
+            i+=1
+        self._helpStr = "{0:.<50}".format(self._helpStr)
+
+        i = 1
+        if len(desc) > 0:
+            self._helpStr = self._helpStr + desc[0]
+            while i < len(desc):
+                self._helpStr = self._helpStr + "\n" + "{0:50}".format("") + desc[i]
+                i+=1
+        
 
     def matchAlias(self, arg): return arg in self._aliases
     def defaultAlias(self): return self._aliases[0]
@@ -28,6 +50,9 @@ class Argument:
 
     def __str__(self):
         return "Argument " + self._aliases[0] + "; type " + str(self._argtype) + "; " + str(self._parameters) + " parameters"
+
+    def helpStr(self):
+        return self._helpStr
 
 class ArgumentParser:
     def __init__(self):
@@ -82,3 +107,10 @@ class ArgumentParser:
 
     def getAliasList(self):
         return self._aliasList
+
+    def generateHelp(self):
+        helpstr = ""
+        for d in self._argDictionary:
+            for a in self._argDictionary[d]:
+                helpstr = helpstr + a.helpStr() + "\n"
+        return helpstr
