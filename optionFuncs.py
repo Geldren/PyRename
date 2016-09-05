@@ -43,3 +43,9 @@ def option_date(parameters, fileName):
 
 def option_time(parameters, fileName):
     '''Set timestamp'''
+
+def option_deleteMatch(parameters, fileName):
+    '''Set timestamp'''
+
+def option_workingDir(parameters, fileName):
+    '''Set timestamp'''
