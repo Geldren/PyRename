@@ -29,7 +29,7 @@ def option_trim(parameters, fileName):
 
 def option_rename(parameters, fileName):
     '''Replaces the whole name'''
-    return fileName
+    return parameters[0]
 
 def option_number(parameters, fileName):
     '''Numbers the fileName with given countstring'''
