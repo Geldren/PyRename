@@ -3,13 +3,17 @@ from renameException import RenameException
 import re
 import os
 
+countStringIndex = 0
+
 def option_lower(parameters):
     '''Make stuff lowercase'''
+    fileName = parameters[0]
 
     return fileName.lower()
 
 def option_upper(parameters):
     '''Make stuff uppercase'''
+    fileName = parameters[0]
 
     return fileName.upper()
 
@@ -34,11 +38,20 @@ def option_trim(parameters):
         return fileName[n:len(fileName)]
 
 def option_rename(parameters):
-    '''Replaces the whole name'''
+    '''Replaces a section of the name'''
+    fileName = parameters[2]
+
+    n = fileName.find(parameters[0])
+    n2 = n + len(parameters[0])
+    end = len(fileName)
+
+    fileName = fileName[0:n] + parameters[1] + fileName[n2:end]
+
     return fileName
 
 def option_number(parameters):
     '''Numbers the fileName with given countstring'''
+
     return fileName
 
 def option_touch(parameters):
