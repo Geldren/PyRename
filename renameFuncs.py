@@ -51,19 +51,37 @@ def option_rename(parameters):
 
 def option_number(parameters):
     '''Numbers the fileName with given countstring'''
+    countString = parameters[0]
+    global countStringIndex
+    fileName = parameters[1]
+
+    fileName = countString[countStringIndex] + fileName
+
+    countStringIndex += 1
 
     return fileName
 
 def option_touch(parameters):
     '''sets date and time to now'''
+    fileName = parameters[0]
+
+    os.utime(fileName)
     return fileName
 
 def option_date(parameters):
     '''Set datestamp'''
+    fileName = parameters[1]
+    date = parameters[0]
+
+    os.utime(fileName, date)
     return fileName
 
 def option_time(parameters):
     '''Set timestamp'''
+    fileName = parameters[1]
+    time = parameters[0]
+
+    os.utime(fileName, time)
     return fileName
 
 def option_workingDir(parameters):
