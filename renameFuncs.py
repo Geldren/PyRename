@@ -2,19 +2,20 @@ import renameException
 from renameException import RenameException
 import re
 import os
-
-countStringIndex = 0
+from datetime import datetime
+from datetime import time
+from datetime import date
 
 def option_lower(parameters):
     '''Make stuff lowercase'''
     fileName = parameters[0]
-
+    #Returns a lowercase version of name
     return fileName.lower()
 
 def option_upper(parameters):
     '''Make stuff uppercase'''
     fileName = parameters[0]
-
+    #Returns a uppercase version of name
     return fileName.upper()
 
 def option_trim(parameters):
@@ -40,47 +41,60 @@ def option_trim(parameters):
 def option_rename(parameters):
     '''Replaces a section of the name'''
     fileName = parameters[2]
-
+    #Finds the start and end of the substring to be replaced
     n = fileName.find(parameters[0])
     n2 = n + len(parameters[0])
     end = len(fileName)
-
+    #Cuts out old substring and reassembles the name around new one
     fileName = fileName[0:n] + parameters[1] + fileName[n2:end]
 
     return fileName
 
 def option_number(parameters):
     '''Numbers the fileName with given countstring'''
-    countString = parameters[0]
-    global countStringIndex
-    fileName = parameters[1]
+    fileName = parameters[0]
+    counts = []
 
-    fileName = countString[countStringIndex] + fileName
+    for i in fileName
+        if i == '#'
+            counts += [i]
 
-    countStringIndex += 1
+    for j in count
 
     return fileName
 
 def option_touch(parameters):
     '''sets date and time to now'''
     fileName = parameters[0]
-
+    #Sets date/time accessed and modified to current time
     os.utime(fileName)
     return fileName
 
 def option_date(parameters):
     '''Set datestamp'''
     fileName = parameters[1]
-    date = parameters[0]
+    dateInput = parameters[0]
 
-    os.utime(fileName, date)
+    #Converts date into timestamp value
+    dateInput = date(dateInput[4:], dateInput[2:4], dateInput[:2])
+    time.mktime(dateInput.timetuple())
+
+    #Creates tuple for utime
+    dateInput = (dateInput, dateInput)
+    os.utime(fileName, dateInput)
     return fileName
 
 def option_time(parameters):
     '''Set timestamp'''
     fileName = parameters[1]
-    time = parameters[0]
+    timeInput = parameters[0]
 
+    #Converts time into timestamp value
+    timeInput = time(timeInput[:2], timeInput[2:4], timeInput[4:])
+    time.mktime(timeInput.timetuple())
+
+    #Creates tuple for utime
+    timeInput = (timeInput, timeInput)
     os.utime(fileName, time)
     return fileName
 
