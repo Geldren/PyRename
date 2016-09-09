@@ -1,111 +1,67 @@
-import renameException
-from renameException import RenameException
 import re
-import os
+import files
 
-from datetime import datetime
-from datetime import time
-from datetime import date
-
-def option_lower(parameters):
+def option_lower(fileName):
     '''Make stuff lowercase'''
-    fileName = parameters[0]
+
     #Returns a lowercase version of name
     return fileName.lower()
 
-def option_upper(parameters):
+def option_upper(fileName):
     '''Make stuff uppercase'''
-    fileName = parameters[0]
+
     #Returns a uppercase version of name
     return fileName.upper()
 
-def option_trim(parameters):
+def option_trim(n, fileName):
     '''Trim characters from front or back'''
-    if len(parameters) < 2:
-        raise RenameException("Invalid number of trim arguments: " + str(parameters))
-        return
-
-    #Try to interpret param as number; if fail, raise exception with single error message string to be handled in main
-    fileName = parameters[1]
-    n = 0
-    try:
-        n = int(parameters[0])
-    except:
-        raise RenameException("Invalid trim option: " + str(n))
-        return
 
     if n < 0:
         return fileName[0:n]
     else:
         return fileName[n:len(fileName)]
 
-def option_rename(parameters):
+def option_rename(find, replace, fileName):
     '''Replaces a section of the name'''
-    fileName = parameters[2]
+
     #Finds the start and end of the substring to be replaced
-    n = fileName.find(parameters[0])
-    n2 = n + len(parameters[0])
+    n = fileName.find(find)
+    n2 = n + len(find)
     end = len(fileName)
     #Cuts out old substring and reassembles the name around new one
-    fileName = fileName[0:n] + parameters[1] + fileName[n2:end]
+    fileName = fileName[0:n] + replace + fileName[n2:end]
 
     return fileName
 
-def option_number(parameters):
+def option_number(countString, fileName):
     '''Numbers the fileName with given countstring'''
-    countString = parameters[0]
-    fileName = parameters[1]
+    try: option_number.counter += 1
+    except: option_number.counter = 1
 
     counts = []
 
-    for i in fileName
-        if i == '#'
+    for i in range(len(fileName)):
+        if fileName[i] == '#':
             counts += [i]
 
-    for j in count
 
     return fileName
-option_number.countStringIndex = 0
 
-def option_touch(parameters):
+def option_touch(fileName):
     '''sets date and time to now'''
-    fileName = parameters[0]
+
     #Sets date/time accessed and modified to current time
-    os.utime(fileName)
+    files.touchFile(fileName)
     return fileName
 
-def option_date(parameters):
+def option_date(dateInput, fileName):
     '''Set datestamp'''
-    fileName = parameters[1]
-    dateInput = parameters[0]
 
-    #Converts date into timestamp value
-    dateInput = date(dateInput[4:], dateInput[2:4], dateInput[:2])
-    time.mktime(dateInput.timetuple())
-
-    #Creates tuple for utime
-    dateInput = (dateInput, dateInput)
-    os.utime(fileName, dateInput)
+    files.setDate(dateInput, fileName)
     return fileName
 
-def option_time(parameters):
+def option_time(timeInput, fileName):
     '''Set timestamp'''
-    fileName = parameters[1]
-    timeInput = parameters[0]
 
-    #Converts time into timestamp value
-    timeInput = time(timeInput[:2], timeInput[2:4], timeInput[4:])
-    time.mktime(timeInput.timetuple())
-
-    #Creates tuple for utime
-    timeInput = (timeInput, timeInput)
-    os.utime(fileName, time)
+    file.setTime(timeInput, fileName)
     return fileName
-
-def option_workingDir(parameters):
-    '''Change directories'''
-    if len(parameters) < 1:
-        raise RenameException("Invalid number of workingDir arguments: " + str(parameters))
-        return;
-
-    os.chdir(parameters[0])

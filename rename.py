@@ -6,21 +6,19 @@ import sys
 import renameFuncs as of
 import input
 import files
-import renameException
-from renameException import RenameException
 import argparse
 
 def addOperationAction(function):
     class OperationAction(argparse.Action):
-        def __init__(self, option_strings, dest, nargs=None, **kwargs):
-            if nargs is not None:
-                raise ValueError("nargs not allowed")
-            super(OperationAction, self).__init__(option_strings, dest, **kwargs)
         def __call__(self, parser, namespace, values, option_string=None):
-            try:
-                setattr(namespace, self.dest, getattr(namespace, self.dest).append([function, values]))
-            except:
+            if not hasattr(namespace, self.dest):
                 setattr(namespace, self.dest, [[function, values]])
+            else:
+                currattr = getattr(namespace, self.dest)
+                currattr.append([function, values])
+                setattr(namespace, self.dest, currattr)
+
+    return OperationAction
 
 #Function to add all command line arguments to the a parser and return it
 def buildParser():
@@ -29,28 +27,28 @@ def buildParser():
     Below is a list of all supported options, what they do, and their parameters. Any command line arguments which are not options or option parameters will be interpreted as glob-style format strings to match file names\n\
     All other command line options which may modify files will be executed for each file in the order entered")
 
-    p.add_argument("-t", "--trim", dest="oplist", metavar="N", type=int, nargs=1, action=addOperationAction(of.option_trim),
+    p.add_argument("-t", "--trim", dest="nameops", metavar="N", type=int, nargs=1, action=addOperationAction(of.option_trim),
     help="Removes 'n'' characters from a string\nIf n is positive, they will be removed from the front\nIf n is negative, they will be removed from the end")
     
-    p.add_argument("-r", "--replace", dest="oplist", metavar=("find","replace"), type=str, nargs=2, action=addOperationAction(of.option_rename),
+    p.add_argument("-r", "--replace", dest="nameops", metavar=("find","replace"), type=str, nargs=2, action=addOperationAction(of.option_rename),
     help="Searches filenames for 'pattern' and where it is found it is replaced with 'replace'\nSupports regEx capture groups")
     
-    p.add_argument("-n", "--number", dest="oplist", metavar="countstring", type=str, nargs=1, action=addOperationAction(of.option_number),
+    p.add_argument("-n", "--number", dest="nameops", metavar="countstring", type=str, nargs=1, action=addOperationAction(of.option_number),
     help="Renames files in sequence using 'countstring'\nAll files will be named whatever 'countstring' is, but any groups of # characters in countstring will be replaced by numbers\nExample:\n\trename.py -n text##\nFiles will be named 'text01' 'text02'...")
     
-    p.add_argument("-D", "--date", dest="oplist", metavar="DDMMYYYY", type=str, nargs=1, action=addOperationAction(of.option_date),
+    p.add_argument("-D", "--date", dest="otherops", metavar="DDMMYYYY", type=str, nargs=1, action=addOperationAction(of.option_date),
     help="Updates file datestamps to the given one")
     
-    p.add_argument("-T", "--time", dest="oplist", metavar="HHMMSS", type=str, nargs=1, action=addOperationAction(of.option_time),
+    p.add_argument("-T", "--time", dest="otherops", metavar="HHMMSS", type=str, nargs=1, action=addOperationAction(of.option_time),
     help="Updates file timestamps to the given one")
     
-    p.add_argument("-l", "--lower", dest="oplist", action="append_const", const=[of.option_lower],       
+    p.add_argument("-l", "--lower", dest="nameops", action="append_const", const=[of.option_lower],       
     help="Changes filenames to be all lower-case")
     
-    p.add_argument("-u", "--upper", dest="oplist", action="append_const", const=[of.option_upper],       
+    p.add_argument("-u", "--upper", dest="nameops", action="append_const", const=[of.option_upper],       
     help="Changes filenames to be all upper-case")
     
-    p.add_argument("-dt", "--touch", dest="oplist", action="append_const", const=[of.option_touch],       
+    p.add_argument("-dt", "--touch", dest="otherops", action="append_const", const=[of.option_touch],       
     help="Updates file date/timestamps to the current date/time")
     
     p.add_argument("-v", "--verbose", dest="verbose", action="store_true",                              
@@ -96,7 +94,7 @@ def main(argv):
     for g in globs:
         fileNames += glob.glob(g)
 
-    #process ALLLL the files
+    #process ALL the files
     processAllFilenames(args, fileNames)
 
     #move back to original directory
@@ -125,14 +123,14 @@ def processAllFilenames(args, fileNames):
 
             #apply all rename functions in order specified
             newName = f
-            if args.oplist != None:
-                for o in args.oplist:
+            if args.nameops != None:
+                for o in args.nameops:
                     try:
                         newName = o[0](*((o[1]+[newName]) if len(o)>1 else [newName]))
-                    except RenameException as e:
-                        print("Error:", e.message)
                     except Exception as e:
-                        print("Unknown exception:", e)
+                        print("Error:", e)
+                        print("Exiting...")
+                        return
 
             #print before/after names if requested
             if verbose or printonly:
@@ -141,6 +139,16 @@ def processAllFilenames(args, fileNames):
             if not printonly:
                 files.renameFile(f, newName)
                 f = newName
+
+            #apply all functions which won't change the name
+            if args.otherops != None:
+                for o in args.otherops:
+                    try:
+                        o[0](*((o[1]+[f]) if len(o)>1 else [f]))
+                    except Exception as e:
+                        print("Error:", e)
+                        print("Exiting...")
+                        return
         else:
             print("Skipping",f,"...\n")
 
