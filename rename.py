@@ -8,31 +8,68 @@ import input
 import files
 import renameException
 from renameException import RenameException
-import arguments
-from arguments import Argument
+import argparse
 
-TYPE_OPERATION = 'oper'
-TYPE_OPTION = 'opt'
-TYPE_ACTION = 'act'
-TYPE_HELP = 'spec'
+def addOperationAction(function):
+    class OperationAction(argparse.Action):
+        def __init__(self, option_strings, dest, nargs=None, **kwargs):
+            if nargs is not None:
+                raise ValueError("nargs not allowed")
+            super(OperationAction, self).__init__(option_strings, dest, **kwargs)
+        def __call__(self, parser, namespace, values, option_string=None):
+            try:
+                setattr(namespace, self.dest, getattr(namespace, self.dest).append([function, values]))
+            except:
+                setattr(namespace, self.dest, [[function, values]])
 
 #Function to add all command line arguments to the a parser and return it
 def buildParser():
-    p = arguments.ArgumentParser()
-    p.addArgument(Argument(["-t", "--trim"],        TYPE_OPERATION, 1, [of.option_trim],        argNames=["n"], desc=["Removes 'n'' characters from a string","If n is positive, they will be removed from the front","If n is negative, they will be removed from the end"]))
-    p.addArgument(Argument(["-r", "--replace"],     TYPE_OPERATION, 2, [of.option_rename],      argNames=["pattern","replace"], desc=["Searches filenames for 'pattern' and where it is found it is replaced with 'replace'","Supports regEx capture groups"]))
-    p.addArgument(Argument(["-n", "--number"],      TYPE_OPERATION, 1, [of.option_number],      argNames=["countstring"], desc=["Renames files in sequence using 'countstring'","All files will be named whatever 'countstring' is, but any groups of # characters in countstring will be replaced by numbers","Example:","\trename.py -n text##","Files will be named 'text01' 'text02'..."]))
-    p.addArgument(Argument(["-D", "--date"],        TYPE_OPERATION, 1, [of.option_date],        argNames=["DDMMYYYY"], desc=["Updates file datestamps to the given one"]))
-    p.addArgument(Argument(["-T", "--time"],        TYPE_OPERATION, 1, [of.option_time],        argNames=["HHMMSS"], desc=["Updates file timestamps to the given one"]))
-    p.addArgument(Argument(["-l", "--lower"],       TYPE_OPERATION, 0, [of.option_lower],       desc=["Changes filenames to be all lower-case"]))
-    p.addArgument(Argument(["-u", "--upper"],       TYPE_OPERATION, 0, [of.option_upper],       desc=["Changes filenames to be all upper-case"]))
-    p.addArgument(Argument(["-dt", "--touch"],      TYPE_OPERATION, 0, [of.option_touch],       desc=["Updates file date/timestamps to the current date/time"]))
-    p.addArgument(Argument(["-h", "--help"],        TYPE_HELP,                                  desc=["Displays this help screen"]))
-    p.addArgument(Argument(["-v", "--verbose"],     TYPE_OPTION,                                desc=["Outputs filenames before and after renaming"]))
-    p.addArgument(Argument(["-p", "--print"],       TYPE_OPTION,                                desc=["Does not actually rename files; outputs what filenames would be before and after renaming"]))
-    p.addArgument(Argument(["-i", "--interactive"], TYPE_OPTION,                                desc=["rename.py will query the user as to whether it should process each file"]))
-    p.addArgument(Argument(["-d", "--delete"],      TYPE_OPTION,                                desc=["Deletes all files matched"]))
-    p.addArgument(Argument(["-wd", "--workingdir"], TYPE_ACTION,    1, [of.option_workingDir],  argNames=["dir"], desc=["Changes the working directory - Use to specify where the files to rename are\nCan be relative or absolute path"]))
+    p = argparse.ArgumentParser(description="rename.py is a file renaming utility program which can be used to batch-rename files in a directory.\n\
+    \n\tUSAGE: rename.py [options] file1 file2...\n\
+    Below is a list of all supported options, what they do, and their parameters. Any command line arguments which are not options or option parameters will be interpreted as glob-style format strings to match file names\n\
+    All other command line options which may modify files will be executed for each file in the order entered")
+
+    p.add_argument("-t", "--trim", dest="oplist", metavar="N", type=int, nargs=1, action=addOperationAction(of.option_trim),
+    help="Removes 'n'' characters from a string\nIf n is positive, they will be removed from the front\nIf n is negative, they will be removed from the end")
+    
+    p.add_argument("-r", "--replace", dest="oplist", metavar=("find","replace"), type=str, nargs=2, action=addOperationAction(of.option_rename),
+    help="Searches filenames for 'pattern' and where it is found it is replaced with 'replace'\nSupports regEx capture groups")
+    
+    p.add_argument("-n", "--number", dest="oplist", metavar="countstring", type=str, nargs=1, action=addOperationAction(of.option_number),
+    help="Renames files in sequence using 'countstring'\nAll files will be named whatever 'countstring' is, but any groups of # characters in countstring will be replaced by numbers\nExample:\n\trename.py -n text##\nFiles will be named 'text01' 'text02'...")
+    
+    p.add_argument("-D", "--date", dest="oplist", metavar="DDMMYYYY", type=str, nargs=1, action=addOperationAction(of.option_date),
+    help="Updates file datestamps to the given one")
+    
+    p.add_argument("-T", "--time", dest="oplist", metavar="HHMMSS", type=str, nargs=1, action=addOperationAction(of.option_time),
+    help="Updates file timestamps to the given one")
+    
+    p.add_argument("-l", "--lower", dest="oplist", action="append_const", const=[of.option_lower],       
+    help="Changes filenames to be all lower-case")
+    
+    p.add_argument("-u", "--upper", dest="oplist", action="append_const", const=[of.option_upper],       
+    help="Changes filenames to be all upper-case")
+    
+    p.add_argument("-dt", "--touch", dest="oplist", action="append_const", const=[of.option_touch],       
+    help="Updates file date/timestamps to the current date/time")
+    
+    p.add_argument("-v", "--verbose", dest="verbose", action="store_true",                              
+    help="Outputs filenames before and after renaming")
+    
+    p.add_argument("-p", "--print", dest="print", action="store_true",                                
+    help="Does not actually rename files; outputs what filenames would be before and after renaming")
+    
+    p.add_argument("-i", "--interactive", dest="interact", action="store_true",                          
+    help="This program will query the user as to whether it should process each file")
+    
+    p.add_argument("-d", "--delete", dest="delete", action="store_true",                                
+    help="Deletes all files matched")
+    
+    p.add_argument("-wd", "--workingdir", dest="workingdir", metavar="dir", type=str, nargs=1, 
+    help="Changes the working directory - Use to specify where the files to rename are\nCan be relative or absolute path")
+    
+    p.add_argument("globs", nargs="+", metavar="glob pattern", type=str,
+    help="A list of glob strings to match files with")
     return p
 
 #main entry point to program
@@ -44,61 +81,36 @@ def main(argv):
 
     #build parser and parse args
     parser = buildParser()
-    parser.parseArgs(argv)
-
-    #check for -h argument
-    help = parser.getArgType(TYPE_HELP)
-    if len(help) > 0:
-        usage(parser)
-        return
+    args=parser.parse_args()
     
-    #do any immediate action arguments (-wd)
-    actions = parser.getArgType(TYPE_ACTION)
-    for a in actions:
+    if args.workingdir != None:
         try:
-            a.trigger()
-        except RenameException as e:
-            print("Error:",e.message)
-        except Exception as e:
-            print("Unknown Exception:",e)
+            os.chdir(args.workingdir[0])
+        except:
+            print("Unable to change directory to", args.workingdir[0] + "; staying in", workingdir);
+            os.chdir(workingdir);
 
     #convert blob shorthands to full file list
-    globs = parser.getArgType(Argument.TYPE_DEFAULT)
+    globs = args.globs
     fileNames = []
     for g in globs:
         fileNames += glob.glob(g)
 
-    #get option and operation arguments
-    ops = parser.getArgType(TYPE_OPERATION)
-    opts = parser.getArgType(TYPE_OPTION)
-
-    #translate option arguments to just string aliases
-    options = []
-    for o in opts:
-        options.append(o.defaultAlias())
-
     #process ALLLL the files
-    processAllFilenames(ops, fileNames, options)
+    processAllFilenames(args, fileNames)
 
     #move back to original directory
     os.chdir(workingdir)
 
-def usage(parser):
-    '''Prints a help menu for rename.py'''
-    print("-"*20,"rename.py -- Help","-"*20, sep="|")
-    print("rename.py is a file renaming utility program which can be used to batch-rename files in a directory.")
-    print("\n\tUSAGE:", "rename.py [options] file1 file2...\n")
-    print("Below is a list of all supported options, what they do, and their parameters. Any command line arguments which are not options or option parameters will be interpreted as glob-style format strings to match file names","\n")
-    print("All other command line options which may modify files will be executed for each file in the order entered")
-    print(parser.generateHelp());    
 
-def processAllFilenames(ops, fileNames, options):
+def processAllFilenames(args, fileNames):
     '''Goes through the file list, optionally querying user per file, and applies
     all operations specified in the command line arguments in the order they were given'''
-    delete = '-d' in options
-    interactive = '-i' in options
-    printonly = '-p' in options
-    verbose = '-v' in options
+    delete = args.delete
+    interactive = args.interact
+    printonly = args.print
+    verbose = args.verbose
+
     for f in fileNames:
         run = True
 
@@ -113,13 +125,14 @@ def processAllFilenames(ops, fileNames, options):
 
             #apply all rename functions in order specified
             newName = f
-            for o in ops:
-                try:
-                    newName = (o.trigger([newName])[0])
-                except RenameException as e:
-                    print("Error:", e.message)
-                except Exception as e:
-                    print("Unknown exception:", e)
+            if args.oplist != None:
+                for o in args.oplist:
+                    try:
+                        newName = o[0](*((o[1]+[newName]) if len(o)>1 else [newName]))
+                    except RenameException as e:
+                        print("Error:", e.message)
+                    except Exception as e:
+                        print("Unknown exception:", e)
 
             #print before/after names if requested
             if verbose or printonly:

@@ -3,8 +3,6 @@ from renameException import RenameException
 import re
 import os
 
-countStringIndex = 0
-
 def option_lower(parameters):
     '''Make stuff lowercase'''
     fileName = parameters[0]
@@ -52,7 +50,6 @@ def option_rename(parameters):
 def option_number(parameters):
     '''Numbers the fileName with given countstring'''
     countString = parameters[0]
-    global countStringIndex
     fileName = parameters[1]
 
     fileName = countString[countStringIndex] + fileName
@@ -60,6 +57,7 @@ def option_number(parameters):
     countStringIndex += 1
 
     return fileName
+option_number.countStringIndex = 0
 
 def option_touch(parameters):
     '''sets date and time to now'''
