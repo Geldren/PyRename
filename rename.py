@@ -11,12 +11,12 @@ import argparse
 def addOperationAction(function):
     class OperationAction(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            if not hasattr(namespace, self.dest):
-                setattr(namespace, self.dest, [[function, values]])
-            else:
+            try:
                 currattr = getattr(namespace, self.dest)
                 currattr.append([function, values])
                 setattr(namespace, self.dest, currattr)
+            except:
+                setattr(namespace, self.dest, [[function, values]])
 
     return OperationAction
 
@@ -110,6 +110,11 @@ def processAllFilenames(args, fileNames):
     verbose = args.verbose
 
     for f in fileNames:
+        if not os.path.isfile(f):
+            if verbose or printonly:
+                print(f, "is not a file; skipping...")
+            continue
+
         run = True
 
         #if interactive prompt user for each file

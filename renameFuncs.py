@@ -65,5 +65,5 @@ def option_date(dateInput, fileName):
 def option_time(timeInput, fileName):
     '''Set timestamp'''
 
-    file.setTime(timeInput, fileName)
+    files.setTime(timeInput, fileName)
     return fileName
