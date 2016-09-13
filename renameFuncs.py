@@ -1,4 +1,5 @@
 import re
+import string
 import files
 
 def option_lower(fileName):
@@ -38,12 +39,13 @@ def option_number(countString, fileName):
     try: option_number.counter += 1
     except: option_number.counter = 1
 
-    counts = []
+    poundLocations = []
+    poundLocations = re.finditer('#+', countString)
 
-    for i in range(len(fileName)):
-        if fileName[i] == '#':
-            counts += [i]
-
+    for loc in poundLocations:
+        length = loc[1]-loc[0]
+        replacement = '{:0>{1}}'.format(option_number.counter, length)
+        countString[loc[0]:loc[1]] = replacement
 
     return fileName
 
