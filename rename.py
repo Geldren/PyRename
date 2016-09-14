@@ -117,6 +117,12 @@ def processAllFilenames(args, fileNames):
 
         run = True
 
+        ops = []
+        if args.otherops != None:
+            ops += args.otherops
+        if args.nameops != None:
+            ops += args.nameops
+
         #if interactive prompt user for each file
         if interactive:
             run = input.getBoolInput("Process file" + f + "? (y/n)\n>")
@@ -128,14 +134,13 @@ def processAllFilenames(args, fileNames):
 
             #apply all rename functions in order specified
             newName = f
-            if args.nameops != None:
-                for o in args.nameops:
-                    try:
-                        newName = o[0](*((o[1]+[newName]) if len(o)>1 else [newName]))
-                    except Exception as e:
-                        print("Error:", e)
-                        print("Exiting...")
-                        return
+            for o in ops:
+                try:
+                    newName = o[0](*((o[1]+[newName]) if len(o)>1 else [newName]))
+                except Exception as e:
+                    print("Error:", e)
+                    print("Exiting...")
+                    return
 
             #print before/after names if requested
             if verbose or printonly:
@@ -144,16 +149,6 @@ def processAllFilenames(args, fileNames):
             if not printonly:
                 files.renameFile(f, newName)
                 f = newName
-
-            #apply all functions which won't change the name
-            if args.otherops != None:
-                for o in args.otherops:
-                    try:
-                        o[0](*((o[1]+[f]) if len(o)>1 else [f]))
-                    except Exception as e:
-                        print("Error:", e)
-                        print("Exiting...")
-                        return
         else:
             print("Skipping",f,"...\n")
 
