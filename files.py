@@ -1,3 +1,10 @@
+'''
+Module author: Andrew Stelter and Leif Torgersen
+
+The files module contains a number of useful functions
+abstracting the os calls required to work with files.
+'''
+
 import os
 import time
 
@@ -5,15 +12,29 @@ from datetime import datetime
 from datetime import date
 
 def deleteFile(f):
+    '''Delete a file
+    Parameters: 
+        f - The name of the file to delete'''
     os.remove(f)
 
 def renameFile(f, new):
+    '''Change the name of a file to a different name
+    Parameters: 
+        f - The name of the file to rename
+        new - The name to change the filename to'''
     os.rename(f, new)
     
 def touchFile(f):
+    '''Update the modification time of a file to the current time
+    Parameters: 
+        f - The name of the file to update'''
     os.utime(f)
 
 def setDate(dateString, f):
+    '''Change the dates of creation and modification of a file without changing the times of creation and modification
+    Parameters:
+        dateString - String encoding of the date to change to. Should be of the form DDMMYYYY
+        f - The name of the file to update'''
     if len(dateString) != 8:
         raise Exception("Invalid date string; use the format DDMMYYYY")
         return
@@ -38,6 +59,10 @@ def setDate(dateString, f):
                  time.mktime(newModification.timetuple())))
 
 def setTime(timeString, f):
+    '''Change the times of creation and modification of a file without changing the dates of creation and modification
+    Parameters:
+        timeString - String encoding of the date to change to. Should be of the form HHMMSS
+        f - The name of the file to update'''
     if len(timeString) != 6:
         raise Exception("Invalid time string; use the format HHMMSS")
         return

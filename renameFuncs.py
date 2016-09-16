@@ -1,3 +1,7 @@
+'''
+Module author: Leif Torgersen
+'''
+
 import re
 import string
 import files
