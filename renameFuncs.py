@@ -29,12 +29,8 @@ def option_trim(n, fileName):
 def option_rename(find, replace, fileName):
     '''Replaces a section of the name'''
 
-    #Finds the start and end of the substring to be replaced
-    n = fileName.find(find)
-    n2 = n + len(find)
-    end = len(fileName)
-    #Cuts out old substring and reassembles the name around new one
-    fileName = fileName[0:n] + replace + fileName[n2:end]
+    #Finds the substring to be replaced and substitutes it
+    fileName = re.sub(find, replace, filename)
 
     return fileName
 
@@ -42,16 +38,16 @@ def option_number(countString, fileName):
     '''Numbers the fileName with given countstring'''
     try: option_number.counter += 1
     except: option_number.counter = 1
-
+    #Finds all # signs in countstring
     poundLocations = []
     poundLocations = re.finditer('#+', countString)
-
+    #For each # string, it creates a string with the counter and a fill character of 0
     for loc in poundLocations:
         length = loc[1]-loc[0]
         replacement = '{:0>{1}}'.format(option_number.counter, length)
         countString[loc[0]:loc[1]] = replacement
-
-    return fileName
+    print(countString)
+    return countString
 
 def option_touch(fileName):
     '''sets date and time to now'''
