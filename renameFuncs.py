@@ -36,6 +36,9 @@ def option_rename(find, replace, fileName):
 
 def option_number(countString, fileName):
     '''Numbers the fileName with given countstring'''
+    if(countString.find('#') < 0):
+        raise Exception("countString does not contain any # symbols")
+        return
     try: option_number.counter += 1
     except: option_number.counter = 1
     #Finds all # signs in countstring
