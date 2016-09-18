@@ -30,7 +30,7 @@ def option_rename(find, replace, fileName):
     '''Replaces a section of the name'''
 
     #Finds the substring to be replaced and substitutes it
-    fileName = re.sub(find, replace, filename)
+    fileName = re.sub(find, replace, fileName)
 
     return fileName
 
@@ -40,13 +40,13 @@ def option_number(countString, fileName):
     except: option_number.counter = 1
     #Finds all # signs in countstring
     poundLocations = []
-    poundLocations = re.finditer('#+', countString)
+    poundLocations = re.finditer('(#+)', countString)
     #For each # string, it creates a string with the counter and a fill character of 0
     for loc in poundLocations:
-        length = loc[1]-loc[0]
-        replacement = '{:0>{1}}'.format(option_number.counter, length)
-        countString[loc[0]:loc[1]] = replacement
-    print(countString)
+        inds = loc.span()
+        length = inds[1]-inds[0]
+        replacement = '{0:{fill}>{width}}'.format(option_number.counter, width=length, fill='0')
+        countString = countString[0:inds[0]]+replacement+countString[inds[1]:]
     return countString
 
 def option_touch(fileName):
