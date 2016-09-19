@@ -22,7 +22,10 @@ def renameFile(f, new):
     Parameters: 
         f - The name of the file to rename
         new - The name to change the filename to'''
-    os.rename(f, new)
+    try:
+        os.rename(f, new)
+    except:
+        raise Exception(f, new)
     
 def touchFile(f):
     '''Update the modification time of a file to the current time
@@ -31,7 +34,7 @@ def touchFile(f):
     os.utime(f)
 
 def setDate(dateString, f):
-    '''Change the dates of creation and modification of a file without changing the times of creation and modification
+    '''Change the dates of access and modification of a file without changing the times of access and modification
     Parameters:
         dateString - String encoding of the date to change to. Should be of the form DDMMYYYY
         f - The name of the file to update'''
@@ -40,7 +43,7 @@ def setDate(dateString, f):
         return
 
     #Get the original time created and modified
-    creation = datetime.fromtimestamp(os.path.getctime(f))
+    access = datetime.fromtimestamp(os.path.getctime(f))
     modification = datetime.fromtimestamp(os.path.getmtime(f))
 
     #Pull the day, month, and year out of the input
@@ -49,17 +52,17 @@ def setDate(dateString, f):
     year = int(dateString[4:8])
 
     #Create new timestamps by merging the original times with the new date
-    newCreation = datetime(year, month, day, \
-                           creation.hour, creation.minute, creation.second)
+    newAccess = datetime(year, month, day, \
+                           access.hour, access.minute, access.second)
 
     newModification = datetime(year, month, day, \
                                modification.hour, modification.minute, modification.second)
 
-    os.utime(f, (time.mktime(newCreation.timetuple()),\
+    os.utime(f, (time.mktime(newAccess.timetuple()),\
                  time.mktime(newModification.timetuple())))
 
 def setTime(timeString, f):
-    '''Change the times of creation and modification of a file without changing the dates of creation and modification
+    '''Change the times of access and modification of a file without changing the dates of access and modification
     Parameters:
         timeString - String encoding of the date to change to. Should be of the form HHMMSS
         f - The name of the file to update'''
@@ -68,7 +71,7 @@ def setTime(timeString, f):
         return
 
     #Get the original time created and modified
-    creation = datetime.fromtimestamp(os.path.getctime(f))
+    access = datetime.fromtimestamp(os.path.getctime(f))
     modification = datetime.fromtimestamp(os.path.getmtime(f))
 
     #Pull the day, month, and year out of the input
@@ -77,11 +80,11 @@ def setTime(timeString, f):
     second = int(timeString[4:6])
 
     #Create new timestamps by merging the original times with the new date
-    newCreation = datetime(creation.year, creation.month, creation.day, \
+    newAccess = datetime(access.year, access.month, access.day, \
                            hour, minute, second)
 
     newModification = datetime(modification.year,  modification.month,  modification.day, \
                                hour, minute, second)
 
-    os.utime(f, (time.mktime(newCreation.timetuple()),\
+    os.utime(f, (time.mktime(newAccess.timetuple()),\
                  time.mktime(newModification.timetuple())))

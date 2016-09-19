@@ -211,8 +211,8 @@ def main(argv):
         try:
             os.chdir(args.workingdir[0])
         except:
-            print("Unable to change directory to", args.workingdir[0] + "; staying in", workingdir);
-            os.chdir(workingdir)
+            print("Unable to change directory to", args.workingdir[0] + "; Exiting...")
+            return
 
     #convert blob shorthands to full file list
     globs = args.globs
@@ -284,11 +284,13 @@ def processAllFilenames(args, fileNames):
 
             #print before/after names if requested
             if verbose or printonly:
-                print(f, "-->", newName, "\n")
+                print(f, "-->", newName)
             #if not printonly, actually apply the name change
             if not printonly:
-                files.renameFile(f, newName)
-                f = newName
+                try:
+                    files.renameFile(f, newName)
+                except Exception as ex:
+                    print("Unable to rename", "'"+ex.args[0]+"'", "to", "'"+ex.args[1]+"'", "\n")
         else:
             print("Skipping",f,"...\n")
 
