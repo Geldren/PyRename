@@ -29,7 +29,9 @@ def option_trim(n, fileName):
 def option_rename(find, replace, fileName):
     '''Replaces a section of the name'''
 
-    #Finds the substring to be replaced and substitutes it
+    #takes in a string to modify, the substring to look for
+    #the first place the substring is found, it is removed
+    #and replaced with the specified replacement string
     fileName = re.sub(find, replace, fileName)
 
     return fileName
