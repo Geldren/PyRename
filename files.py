@@ -28,7 +28,7 @@ def renameFile(f, new):
         raise Exception(f, new)
     
 def touchFile(f):
-    '''Update the modification time of a file to the current time
+    '''Update the access and modification times of a file to the current time
     Parameters: 
         f - The name of the file to update'''
     os.utime(f)

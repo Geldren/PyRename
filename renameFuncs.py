@@ -1,5 +1,7 @@
 '''
 Module author: Leif Torgersen
+
+Module containing functions for completing the operations associated with command line arguments in the rename.py program
 '''
 
 import re
@@ -7,19 +9,19 @@ import string
 import files
 
 def option_lower(fileName):
-    '''Make stuff lowercase'''
+    '''Make a string all lowercase'''
 
     #Returns a lowercase version of name
     return fileName.lower()
 
 def option_upper(fileName):
-    '''Make stuff uppercase'''
+    '''Make a string all uppercase'''
 
     #Returns a uppercase version of name
     return fileName.upper()
 
 def option_trim(n, fileName):
-    '''Trim characters from front or back'''
+    '''Remove n characters from a string. If n is negative, they are removed from the end; if positive, the beginning.'''
 
     if n < 0:
         return fileName[0:n]
@@ -27,7 +29,7 @@ def option_trim(n, fileName):
         return fileName[n:len(fileName)]
 
 def option_rename(find, replace, fileName):
-    '''Replaces a section of the name'''
+    '''Replace a section of a filename using regular expressions'''
 
     #takes in a string to modify, the substring to look for
     #the first place the substring is found, it is removed
@@ -37,7 +39,7 @@ def option_rename(find, replace, fileName):
     return fileName
 
 def option_number(countString, fileName):
-    '''Numbers the fileName with given countstring'''
+    '''Change filenames to a specific name containing a number. Every call to the function will increase the number inserted by 1'''
     if(countString.find('#') < 0):
         raise Exception("countString does not contain any # symbols")
         return
@@ -55,20 +57,20 @@ def option_number(countString, fileName):
     return countString
 
 def option_touch(fileName):
-    '''sets date and time to now'''
+    '''Set file date and time to current date and time'''
 
     #Sets date/time accessed and modified to current time
     files.touchFile(fileName)
     return fileName
 
 def option_date(dateInput, fileName):
-    '''Set datestamp'''
+    '''Set file datestamp to requested datestamp'''
 
     files.setDate(dateInput, fileName)
     return fileName
 
 def option_time(timeInput, fileName):
-    '''Set timestamp'''
+    '''Set file timestamp to requested timestamp'''
 
     files.setTime(timeInput, fileName)
     return fileName

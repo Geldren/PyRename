@@ -63,7 +63,10 @@ optional arguments:
                         Changes the working directory - Use to specify where
                         the files to rename are. Can be relative or absolute
                         path
-
+Testing:
+    Tested on Windows 10 by Andrew Stelter
+    Tested on Linux by Leif Torgersen
+    
 Known Bugs:
 Todo:
 Progress Timeline:

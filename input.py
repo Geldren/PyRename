@@ -7,6 +7,7 @@ be extended.
 '''
 def getBoolInput(prompt):
     '''Prompt the user for input and then read a value, attempting to interpret it as a boolean value. If interpretation fails, the default is False
+    Values which are evaluated to true: 'y', 'yes', '1', 'true'
     Parameters:
         prompt - The string to print as a prompt to the user before recieving input
     Returns:
